@@ -10,7 +10,9 @@
 
 @interface PageSlideViewController ()
 
-@property (nonatomic, strong) NSMutableArray *cachedPageViewControllers;
+@property (nonatomic) NSMutableArray *cachedPageViewControllers;
+@property (nonatomic) NSInteger visiblePageIndexMin;
+@property (nonatomic) NSInteger visiblePageIndexMax;
 
 @end
 
@@ -34,6 +36,9 @@
 
 - (void)reloadData
 {
+    _visiblePageIndexMin = -1;
+    _visiblePageIndexMax = -1;
+    
     NSInteger sPageCount = [_dataSource pageCountInPageSlideViewController:self];
     
     [_scrollView setScrollEnabled:sPageCount > 1];
@@ -261,8 +266,16 @@
 
 - (void)didScroll
 {
-    NSInteger sVisiblePageIndexMin = floorf([self pageIndexOffset]);
-    NSInteger sVisiblePageIndexMax = ceilf([self pageIndexOffset]);
+    NSInteger sVisiblePageIndexMin = MIN(MAX(floorf([self pageIndexOffset]), 0), [self pageCount] - 1);
+    NSInteger sVisiblePageIndexMax = MIN(MAX(ceilf([self pageIndexOffset]), 0), [self pageCount] - 1);
+    
+    if (_visiblePageIndexMin == sVisiblePageIndexMin && _visiblePageIndexMax == sVisiblePageIndexMax)
+    {
+        return;
+    }
+    
+    _visiblePageIndexMin = sVisiblePageIndexMin;
+    _visiblePageIndexMax = sVisiblePageIndexMax;
     
     for (NSInteger i = 0; i < [self pageCount]; i ++)
     {

@@ -23,7 +23,6 @@
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="79T-04-LVh">
                             <rect key="frame" x="413" y="0.0" width="1" height="736"/>
-                            <color key="backgroundColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="1" id="Rut-Gw-Jo8"/>
                             </constraints>
