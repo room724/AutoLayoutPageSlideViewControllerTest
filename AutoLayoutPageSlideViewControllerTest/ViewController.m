@@ -35,8 +35,8 @@
     if ([[aSegue identifier] isEqualToString:@"PAGE"])
     {
         _pageSlideViewController = [aSegue destinationViewController];
-        [_pageSlideViewController setMarginTop:100];
-        [_pageSlideViewController setMarginBottom:50];
+        [_pageSlideViewController setPageMarginTop:100];
+        [_pageSlideViewController setPageMarginBottom:50];
         [_pageSlideViewController setDataSource:self];
     }
 }
@@ -48,7 +48,7 @@
     return 3;
 }
 
-- (UIViewController *)pageViewControllerAtPageIndex:(NSInteger)aPageIndex
+- (UIViewController<PageViewController> *)pageViewControllerAtPageIndex:(NSInteger)aPageIndex
 {
     UIViewController *sPageViewController = [[UIViewController alloc] init];
     

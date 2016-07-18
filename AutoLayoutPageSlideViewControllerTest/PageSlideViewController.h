@@ -10,13 +10,21 @@
 
 @class PageSlideViewController;
 
+@protocol PageViewController <NSObject>
+
+@optional
+
+- (void)didSelectInPageSlideViewController:(PageSlideViewController *)aPageSlideViewController;
+
+@end
+
 @protocol PageSlideViewControllerDataSource <NSObject>
 
 @required
 
 - (NSInteger)pageCountInPageSlideViewController:(PageSlideViewController *)aPageSlideViewController;
 
-- (UIViewController *)pageViewControllerAtPageIndex:(NSInteger)aPageIndex;
+- (UIViewController<PageViewController> *)pageViewControllerAtPageIndex:(NSInteger)aPageIndex;
 
 @end
 
@@ -39,16 +47,16 @@
 @property (weak, nonatomic) id<PageSlideViewControllerDataSource> dataSource;
 @property (weak, nonatomic) id<PageSlideViewControllerDelegate> delegate;
 @property (nonatomic) NSInteger selectedPageIndex;
-@property (nonatomic) CGFloat marginTop;
-@property (nonatomic) CGFloat marginBottom;
+@property (nonatomic) CGFloat pageMarginTop;
+@property (nonatomic) CGFloat pageMarginBottom;
 
 - (void)reloadData;
 
 - (void)setSelectedPageIndex:(NSInteger)aPageIndex animated:(BOOL)aAnimated;
 
-- (UIViewController *)selectedPageViewController;
+- (UIViewController<PageViewController> *)selectedPageViewController;
 
-- (UIViewController *)pageViewControllerAtPageIndex:(NSInteger)aPageIndex;
+- (UIViewController<PageViewController> *)pageViewControllerAtPageIndex:(NSInteger)aPageIndex;
 
 - (CGFloat)pageIndexOffset;
 

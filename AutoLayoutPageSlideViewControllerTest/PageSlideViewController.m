@@ -10,7 +10,7 @@
 
 @interface PageSlideViewController ()
 
-@property (nonatomic) NSMutableArray *cachedPageViewControllers;
+@property (nonatomic) NSMutableArray<UIViewController<PageViewController> *> *cachedPageViewControllers;
 @property (nonatomic) NSInteger visiblePageIndexMin;
 @property (nonatomic) NSInteger visiblePageIndexMax;
 
@@ -63,12 +63,12 @@
     [self setSelectedPageIndex:aPageIndex animated:YES];
 }
 
-- (UIViewController *)selectedPageViewController
+- (UIViewController<PageViewController> *)selectedPageViewController
 {
     return [self pageViewControllerAtPageIndex:_selectedPageIndex];
 }
 
-- (UIViewController *)pageViewControllerAtPageIndex:(NSInteger)aPageIndex
+- (UIViewController<PageViewController> *)pageViewControllerAtPageIndex:(NSInteger)aPageIndex
 {
     if (aPageIndex < 0 || aPageIndex >= [_cachedPageViewControllers count])
     {
@@ -77,12 +77,12 @@
     
     id sObject = [_cachedPageViewControllers objectAtIndex:aPageIndex];
     
-    return [sObject isKindOfClass:[UIViewController class]] ? sObject : nil;
+    return [sObject isKindOfClass:[UIViewController<PageViewController> class]] ? sObject : nil;
 }
 
 - (CGFloat)pageIndexOffset
 {
-    return [_scrollView contentOffset].x / CGRectGetWidth([_scrollView bounds]);
+    return MIN(MAX([_scrollView contentOffset].x / CGRectGetWidth([_scrollView bounds]), 0), [self pageCount] - 1);
 }
 
 - (NSInteger)pageCount
@@ -90,16 +90,16 @@
     return [_cachedPageViewControllers count];
 }
 
-- (void)setMarginTop:(CGFloat)aMarginTop
+- (void)setPageMarginTop:(CGFloat)aPageMarginTop
 {
-    _marginTop = aMarginTop;
+    _pageMarginTop = aPageMarginTop;
     
     [self updateConstraintsOfAllPageViews];
 }
 
-- (void)setMarginBottom:(CGFloat)aMarginBottom
+- (void)setPageMarginBottom:(CGFloat)aPageMarginBottom
 {
-    _marginBottom = aMarginBottom;
+    _pageMarginBottom = aPageMarginBottom;
     
     [self updateConstraintsOfAllPageViews];
 }
@@ -125,9 +125,9 @@
     [_contentSizeGuideViewLeadingConstraint setConstant:sLeading];
 }
 
-- (UIViewController *)cachePageViewControllerAtPageIndex:(NSInteger)aPageIndex
+- (UIViewController<PageViewController> *)cachePageViewControllerAtPageIndex:(NSInteger)aPageIndex
 {
-    UIViewController *sPageViewController = [self pageViewControllerAtPageIndex:aPageIndex];
+    UIViewController<PageViewController> *sPageViewController = [self pageViewControllerAtPageIndex:aPageIndex];
     
     if (!sPageViewController)
     {
@@ -139,9 +139,9 @@
     return sPageViewController;
 }
 
-- (UIViewController *)uncachePageViewControllerAtPageIndex:(NSInteger)aPageIndex
+- (UIViewController<PageViewController> *)uncachePageViewControllerAtPageIndex:(NSInteger)aPageIndex
 {
-    UIViewController *sPageViewController = [self pageViewControllerAtPageIndex:aPageIndex];
+    UIViewController<PageViewController> *sPageViewController = [self pageViewControllerAtPageIndex:aPageIndex];
     
     if (sPageViewController)
     {
@@ -194,8 +194,8 @@
 {
     BOOL sHasConstraints = NO;
     CGFloat sLeadingConstant = [self pageViewLeadingWithPageIndex:aPageIndex];
-    CGFloat sTopConstant = _marginTop;
-    CGFloat sHeightConstant = - _marginTop - _marginBottom;
+    CGFloat sTopConstant = _pageMarginTop;
+    CGFloat sHeightConstant = - _pageMarginTop - _pageMarginBottom;
     
     for (NSLayoutConstraint *sConstraint in [_scrollView constraints])
     {
@@ -266,8 +266,8 @@
 
 - (void)didScroll
 {
-    NSInteger sVisiblePageIndexMin = MIN(MAX(floorf([self pageIndexOffset]), 0), [self pageCount] - 1);
-    NSInteger sVisiblePageIndexMax = MIN(MAX(ceilf([self pageIndexOffset]), 0), [self pageCount] - 1);
+    NSInteger sVisiblePageIndexMin = floorf([self pageIndexOffset]);
+    NSInteger sVisiblePageIndexMax = ceilf([self pageIndexOffset]);
     
     if (_visiblePageIndexMin == sVisiblePageIndexMin && _visiblePageIndexMax == sVisiblePageIndexMax)
     {
@@ -279,7 +279,7 @@
     
     for (NSInteger i = 0; i < [self pageCount]; i ++)
     {
-        UIViewController *sPageViewController = [self pageViewControllerAtPageIndex:i];
+        UIViewController<PageViewController> *sPageViewController = [self pageViewControllerAtPageIndex:i];
         
         if (sVisiblePageIndexMin <= i && i <= sVisiblePageIndexMax)
         {
@@ -307,7 +307,7 @@
 
 - (void)didEndScroll
 {
-    NSInteger sSelectedPageIndex = MIN(MAX([self pageIndexOffset], -1), [self pageCount] - 1);
+    NSInteger sSelectedPageIndex = [self pageIndexOffset];
     
     if (_selectedPageIndex == sSelectedPageIndex)
     {
@@ -319,6 +319,13 @@
     if ([_delegate respondsToSelector:@selector(pageSlideViewController:didChangeSelectedPageIndex:)])
     {
         [_delegate pageSlideViewController:self didChangeSelectedPageIndex:_selectedPageIndex];
+    }
+    
+    UIViewController<PageViewController> *sPageViewController = [self pageViewControllerAtPageIndex:_selectedPageIndex];
+    
+    if ([sPageViewController respondsToSelector:@selector(didSelectInPageSlideViewController:)])
+    {
+        [sPageViewController didSelectInPageSlideViewController:self];
     }
 }
 
